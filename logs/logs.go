@@ -1,4 +1,4 @@
-package log
+package logs
 
 import (
 	"log"
@@ -19,10 +19,9 @@ var (
 	ERROR = Log{level: 7, name: "ERROR", color: "\033[0;31m"}
 )
 
-func (l *Log) Message(v string) *string {
+func (l *Log) Message(v string) {
 	_, file, line, _ := runtime.Caller(1)
 	if l.level > logLevel {
 		log.Printf("%s[%s] %s:%d %s\033[0m\n", l.color, l.name, file, line, v)
 	}
-	return &v
 }
