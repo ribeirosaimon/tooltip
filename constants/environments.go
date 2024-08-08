@@ -13,6 +13,6 @@ const (
 )
 
 const (
-	MongoProperties string = "mongo.uri"
+	MongoProperties string = "mongo.url"
 	ApiPort         string = "api.port"
 )

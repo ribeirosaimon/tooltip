@@ -23,7 +23,7 @@ func (t *Test) SetId(p primitive.ObjectID) {
 	t.Id = p
 }
 
-func newTest() Entity {
+func newTest() *Test {
 	return &Test{
 		Id: primitive.NewObjectID(),
 	}
@@ -31,11 +31,11 @@ func newTest() Entity {
 
 func TestMongo(t *testing.T) {
 	ctx := context.Background()
-	uri, err := aergiatestcontainer.Mongo(ctx)
+	url, err := aergiatestcontainer.Mongo(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	mongo := NewConnMongo(ctx, WithUrl(uri), WithDatabase("test"))
+	mongo := NewConnMongo(ctx, WithUrl(url), WithDatabase("test"))
 
 	t.Run("need to create a insertId", func(t *testing.T) {
 		test := newTest()
