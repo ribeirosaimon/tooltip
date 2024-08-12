@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/url"
+	"reflect"
+	"regexp"
+	"strings"
 	"sync"
-	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/ribeirosaimon/aergia-utils/logs"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -18,10 +20,6 @@ var (
 	aergiaConn      AergiaPgsqlConnection
 	pgsqlDefaultUrl = "jdbc:postgresql://localhost:5432/postgres"
 )
-
-type AergiaMongoInterface interface {
-	GetConnection() *mongo.Database
-}
 
 // Option was a function optional pattern
 type Option func(*AergiaPgsqlConnection)
@@ -44,11 +42,12 @@ type AergiaPgsqlConnection struct {
 	pgsql    *sql.DB
 }
 
-type AergiaPgsqlConnectionInterface interface {
+type AergiaPgsqlInterface interface {
 	GetConnection() *sql.DB
+	CreateQuery(v any) string
 }
 
-func NewConnPgsql(opts ...Option) AergiaPgsqlConnectionInterface {
+func NewConnPgsql(opts ...Option) AergiaPgsqlInterface {
 	aergiaConn = AergiaPgsqlConnection{
 		url: pgsqlDefaultUrl,
 	}
@@ -66,10 +65,14 @@ func NewConnPgsql(opts ...Option) AergiaPgsqlConnectionInterface {
 }
 
 func (c *AergiaPgsqlConnection) conn() *sql.DB {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	db, err := sql.Open("postgres", c.url)
+	ctx := context.TODO()
+	host, port, dbname, user, password, err := extractDBDetails(c.url)
+	if err != nil {
+		logs.ERROR.Message(fmt.Sprintf("Error opening database: %q", err))
+	}
+	sprintf := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", sprintf)
 	if err != nil {
 		logs.ERROR.Message(fmt.Sprintf("Error opening database: %q", err))
 	}
@@ -85,6 +88,68 @@ func (c *AergiaPgsqlConnection) conn() *sql.DB {
 	return db
 }
 
+func extractDBDetails(jdbcURL string) (string, string, string, string, string, error) {
+	re := regexp.MustCompile(`^jdbc:postgresql://([^:/]+):([^/]+)+/([^?]+)`)
+
+	// Encontra a correspondência na string
+	match := re.FindStringSubmatch(jdbcURL)
+
+	if len(match) != 4 {
+		logs.ERROR.Message("Error parsing connection string")
+		return "", "", "", "", "", errors.New("error parsing connection string")
+	}
+
+	// Mapeia os resultados para variáveis
+	host := match[1]
+	port := match[2]
+	dbname := match[3]
+
+	parsedUrl, err := url.Parse(jdbcURL)
+	if err != nil {
+		logs.ERROR.Message("Error parsing connection string")
+		return "", "", "", "", "", errors.New("error parsing connection string")
+	}
+
+	var user string
+	var password string
+	for i, v := range parsedUrl.Query() {
+		if i == "password" {
+			password = v[0]
+		}
+		if i == "user" {
+			user = v[0]
+		}
+	}
+	return host, port, dbname, user, password, nil
+}
+
 func (c *AergiaPgsqlConnection) GetConnection() *sql.DB {
 	return c.pgsql
+}
+
+func (c *AergiaPgsqlConnection) CreateQuery(v any) string {
+	val := reflect.ValueOf(v)
+	typ := reflect.TypeOf(v)
+
+	if typ.Kind() != reflect.Struct {
+		logs.ERROR.Message("CreateQuery: expected a struct")
+	}
+
+	tableName := typ.Name()
+	var columns []string
+	var placeholders []string
+
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		columns = append(columns, field.Name)
+		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
+	}
+
+	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);",
+		strings.ToLower(tableName),
+		strings.Join(columns, ", "),
+		strings.Join(placeholders, ", "),
+	)
+
+	return query
 }

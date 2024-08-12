@@ -26,7 +26,13 @@ func NewPropertiesFile() {
 			propertiesFile[key.Name()] = key.Value()
 		}
 	}
+}
 
+func NewMockPropertiesFile(mockedValues map[string]string) {
+	propertiesFile = make(map[string]string)
+	for key, value := range mockedValues {
+		propertiesFile[key] = value
+	}
 }
 
 func GetEnvironmentValue(v string) string {

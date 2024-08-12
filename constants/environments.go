@@ -13,6 +13,9 @@ const (
 )
 
 const (
-	MongoProperties string = "mongo.url"
-	ApiPort         string = "api.port"
+	PostgressUrl      string = "postgress.url"
+	PostgressDatabase string = "postgress.database"
+	MongoUrl          string = "mongo.url"
+	MongoDatabase     string = "mongo.database"
+	ApiPort           string = "api.port"
 )
