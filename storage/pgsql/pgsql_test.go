@@ -1,53 +1,56 @@
 package pgsql
 
 import (
+	"context"
 	"testing"
 
+	"github.com/ribeirosaimon/aergia-utils/entities/sql"
+	"github.com/ribeirosaimon/aergia-utils/testutils/aergiatestcontainer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPgsql(t *testing.T) {
-	// var err error
-	// ctx := context.Background()
-	// url, err := aergiatestcontainer.Pgsql(ctx)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// pgsql := NewConnPgsql(WithUrl(url), WithDatabase("testdb"))
-	//
-	// t.Run("need insert test", func(t *testing.T) {
-	// 	one, insertError := pgsql.GetConnection().Exec(`
-	//     CREATE TABLE IF NOT EXISTS test (
-	//         id SERIAL PRIMARY KEY,
-	//         name TEXT NOT NULL
-	//     );
-	// `)
-	// 	assert.NoError(t, err)
-	//
-	// 	v, err := pgsql.GetConnection().Exec("INSERT INTO test (name) VALUES ($1)", "test")
-	// 	assert.NoError(t, err)
-	//
-	// 	assert.NoError(t, insertError)
-	// 	assert.NotNil(t, one)
-	// 	assert.NotNil(t, v)
-	//
-	// 	var name string
-	// 	err = pgsql.GetConnection().QueryRow("SELECT name FROM test WHERE name = $1", "test").Scan(&name)
-	// 	assert.NoError(t, err)
-	// 	assert.Equal(t, "test", name)
-	//
-	// })
+	var err error
+	ctx := context.Background()
+	url, err := aergiatestcontainer.Pgsql(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pgsql := NewConnPgsql(WithUrl(url), WithDatabase("testdb"))
 
-	// t.Run("create string query", func(t *testing.T) {
-	// 	u := sql.User{
-	// 		Email:    "test@test.com",
-	// 		Username: "test",
-	// 		Password: "test",
-	// 	}
-	// 	query := pgsql.CreateQuery(u)
-	//
-	// 	assert.Equal(t, "INSERT INTO user (ID, Username, Password, Email, FirstName, LastName, Role, Audit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", query)
-	// })
+	t.Run("need insert test", func(t *testing.T) {
+		one, insertError := pgsql.GetConnection().Exec(`
+	    CREATE TABLE IF NOT EXISTS test (
+	        id SERIAL PRIMARY KEY,
+	        name TEXT NOT NULL
+	    );
+	`)
+		assert.NoError(t, err)
+
+		v, err := pgsql.GetConnection().Exec("INSERT INTO test (name) VALUES ($1)", "test")
+		assert.NoError(t, err)
+
+		assert.NoError(t, insertError)
+		assert.NotNil(t, one)
+		assert.NotNil(t, v)
+
+		var name string
+		err = pgsql.GetConnection().QueryRow("SELECT name FROM test WHERE name = $1", "test").Scan(&name)
+		assert.NoError(t, err)
+		assert.Equal(t, "test", name)
+
+	})
+
+	t.Run("create string query", func(t *testing.T) {
+		u := sql.User{
+			Email:    "test@test.com",
+			Username: "test",
+			Password: "test",
+		}
+		query := pgsql.CreateQuery(u)
+
+		assert.Equal(t, "INSERT INTO user (ID, Username, Password, Email, FirstName, LastName, Role, Audit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", query)
+	})
 
 	for _, v := range []struct {
 		host      string
@@ -58,16 +61,12 @@ func TestPgsql(t *testing.T) {
 		urlString string
 	}{
 		{
-			host: "host", port: "1233", database: "database", username: "username", password: "password",
-			urlString: "postgres://test:test@localhost:1233/testdb?sslmode=disable",
+			host: "localhost", port: "1233", database: "testdb", username: "username", password: "password",
+			urlString: "postgres://username:password@localhost:1233/testdb?sslmode=disable",
 		},
 		{
-			host: "localhost", port: "32815", database: "test",
-			urlString: "postgres://localhost:32815/testdb?sslmode=disable",
-		},
-		{
-			host: "mytest", port: "15612", database: "test",
-			urlString: "postgres://mytest:15612/testdb",
+			host: "localhost", port: "1233", database: "testdb",
+			urlString: "postgres://localhost:1233/testdb?sslmode=disable",
 		},
 	} {
 		t.Run("extract url values", func(t *testing.T) {

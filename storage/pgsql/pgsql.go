@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -89,37 +88,21 @@ func (c *AergiaPgsqlConnection) conn() *sql.DB {
 }
 
 func extractDBDetails(jdbcURL string) (string, string, string, string, string, error) {
-	re := regexp.MustCompile(`^jdbc:postgresql://([^:/]+):([^/]+)+/([^?]+)`)
+	re := regexp.MustCompile(`^postgres://(.+):(.+)@([^:/?#]+):(\d+)/([^/?#]+)\?`)
 
-	// Encontra a correspondência na string
 	match := re.FindStringSubmatch(jdbcURL)
 
-	if len(match) != 4 {
+	if len(match) != 6 {
 		logs.ERROR.Message("Error parsing connection string")
 		return "", "", "", "", "", errors.New("error parsing connection string")
 	}
 
-	// Mapeia os resultados para variáveis
-	host := match[1]
-	port := match[2]
-	dbname := match[3]
+	user := match[1]
+	password := match[2]
+	host := match[3]
+	port := match[4]
+	dbname := match[5]
 
-	parsedUrl, err := url.Parse(jdbcURL)
-	if err != nil {
-		logs.ERROR.Message("Error parsing connection string")
-		return "", "", "", "", "", errors.New("error parsing connection string")
-	}
-
-	var user string
-	var password string
-	for i, v := range parsedUrl.Query() {
-		if i == "password" {
-			password = v[0]
-		}
-		if i == "user" {
-			user = v[0]
-		}
-	}
 	return host, port, dbname, user, password, nil
 }
 
