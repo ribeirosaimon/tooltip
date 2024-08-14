@@ -14,8 +14,12 @@ type handlerError struct {
 }
 
 func AergiaResponseOk(c *gin.Context, b any) {
-	c.JSON(http.StatusOK, b)
-	c.Abort()
+	if b == nil {
+		c.AbortWithStatus(http.StatusOK)
+	} else {
+		c.JSON(http.StatusOK, b)
+		c.Abort()
+	}
 	return
 }
 

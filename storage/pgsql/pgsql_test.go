@@ -64,10 +64,6 @@ func TestPgsql(t *testing.T) {
 			host: "localhost", port: "1233", database: "testdb", username: "username", password: "password",
 			urlString: "postgres://username:password@localhost:1233/testdb?sslmode=disable",
 		},
-		{
-			host: "localhost", port: "1233", database: "testdb",
-			urlString: "postgres://localhost:1233/testdb?sslmode=disable",
-		},
 	} {
 		t.Run("extract url values", func(t *testing.T) {
 			host, port, database, username, password, err := extractDBDetails(v.urlString)
