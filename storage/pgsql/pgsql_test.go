@@ -16,7 +16,7 @@ func TestPgsql(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pgsql := NewConnPgsql(WithUrl(url), WithDatabase("testdb"))
+	pgsql := NewConnPgsql(WithUrl(url))
 
 	t.Run("need insert test", func(t *testing.T) {
 		one, insertError := pgsql.GetConnection().Exec(`
@@ -49,7 +49,7 @@ func TestPgsql(t *testing.T) {
 		}
 		query := pgsql.CreateQuery(u)
 
-		assert.Equal(t, "INSERT INTO user (ID, Username, Password, Email, FirstName, LastName, Role, Audit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);", query)
+		assert.Equal(t, "INSERT INTO user (ID, Username, Password, Email, FirstName, LastName, LoginAtempt, Role, Audit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);", query)
 	})
 
 	for _, v := range []struct {

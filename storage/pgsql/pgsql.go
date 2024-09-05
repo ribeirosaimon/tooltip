@@ -29,16 +29,9 @@ func WithUrl(url string) Option {
 	}
 }
 
-func WithDatabase(db string) Option {
-	return func(a *AergiaPgsqlConnection) {
-		a.database = db
-	}
-}
-
 type AergiaPgsqlConnection struct {
-	database string
-	url      string
-	pgsql    *sql.DB
+	url   string
+	pgsql *sql.DB
 }
 
 type AergiaPgsqlInterface interface {
@@ -54,9 +47,6 @@ func NewConnPgsql(opts ...Option) AergiaPgsqlInterface {
 		opt(&aergiaConn)
 	}
 
-	if aergiaConn.database == "" {
-		panic("Need to set DATABASE")
-	}
 	oncePgsql.Do(func() {
 		aergiaConn.pgsql = aergiaConn.conn()
 	})

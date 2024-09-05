@@ -3,6 +3,8 @@ package properties
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/ribeirosaimon/aergia-utils/constants"
 	"github.com/ribeirosaimon/aergia-utils/logs"
@@ -22,8 +24,22 @@ func NewPropertiesFile() {
 	}
 	for _, section := range cfg.Sections() {
 		for _, key := range section.Keys() {
-			logs.LOG.Message(fmt.Sprintf("Key: %s, Value: %s\n", key.Name(), key.Value()))
-			propertiesFile[key.Name()] = key.Value()
+			re := regexp.MustCompile(`\{\{[A-Za-z0-9_]+\}\}`)
+			if re.MatchString(key.Value()) {
+				var environment string
+				var replaceEnv string
+				for _, u := range re.FindAllStringSubmatch(key.Value(), -1) {
+					replaceEnv = u[0]
+					environment = strings.ReplaceAll(u[0], "{{", "")
+					environment = strings.ReplaceAll(environment, "}}", "")
+
+				}
+				getEnv := os.Getenv(environment)
+				propertiesFile[key.Name()] = strings.ReplaceAll(key.Value(), fmt.Sprintf("%s", replaceEnv), getEnv)
+			} else {
+				logs.LOG.Message(fmt.Sprintf("Key: %s, Value: %s\n", key.Name(), key.Value()))
+				propertiesFile[key.Name()] = key.Value()
+			}
 		}
 	}
 }
@@ -37,4 +53,8 @@ func NewMockPropertiesFile(mockedValues map[string]string) {
 
 func GetEnvironmentValue(v string) string {
 	return propertiesFile[v]
+}
+
+func GetEnvironmentMode() constants.EnvironmentType {
+	return constants.EnvironmentType(propertiesFile[string(constants.AERGIA)])
 }

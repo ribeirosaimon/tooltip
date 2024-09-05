@@ -1,15 +1,15 @@
 package constants
 
-type env string
+type EnvironmentType string
 
 const (
-	AERGIA env = "AERGIA_ENV"
+	AERGIA EnvironmentType = "AERGIA_ENV"
 )
 
 const (
-	DEV  env = "dev"
-	PROD env = "prod"
-	TEST env = "test"
+	DEV  EnvironmentType = "dev"
+	PROD EnvironmentType = "prod"
+	TEST EnvironmentType = "test"
 )
 
 const (
