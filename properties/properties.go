@@ -11,10 +11,10 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-var propertiesFile map[string]string
+var propertiesFile map[string][]byte
 
 func NewPropertiesFile() {
-	propertiesFile = make(map[string]string)
+	propertiesFile = make(map[string][]byte)
 
 	args := os.Getenv(string(constants.AERGIA))
 	properties := fmt.Sprintf("config.%s.properties", args)
@@ -35,23 +35,23 @@ func NewPropertiesFile() {
 
 				}
 				getEnv := os.Getenv(environment)
-				propertiesFile[key.Name()] = strings.ReplaceAll(key.Value(), fmt.Sprintf("%s", replaceEnv), getEnv)
+				propertiesFile[key.Name()] = []byte(strings.ReplaceAll(key.Value(), fmt.Sprintf("%s", replaceEnv), getEnv))
 			} else {
 				logs.LOG.Message(fmt.Sprintf("Key: %s, Value: %s\n", key.Name(), key.Value()))
-				propertiesFile[key.Name()] = key.Value()
+				propertiesFile[key.Name()] = []byte(key.Value())
 			}
 		}
 	}
 }
 
-func NewMockPropertiesFile(mockedValues map[string]string) {
-	propertiesFile = make(map[string]string)
+func NewMockPropertiesFile(mockedValues map[string][]byte) {
+	propertiesFile = make(map[string][]byte)
 	for key, value := range mockedValues {
 		propertiesFile[key] = value
 	}
 }
 
-func GetEnvironmentValue(v string) string {
+func GetEnvironmentValue(v string) []byte {
 	return propertiesFile[v]
 }
 

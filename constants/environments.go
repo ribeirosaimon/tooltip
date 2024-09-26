@@ -18,4 +18,8 @@ const (
 	MongoUrl          string = "mongo.url"
 	MongoDatabase     string = "mongo.database"
 	ApiPort           string = "api.port"
+
+	// SecretKey this block is about security
+	SecretKey  string = "secretKey"
+	LoggedUser string = "loggedUser"
 )
