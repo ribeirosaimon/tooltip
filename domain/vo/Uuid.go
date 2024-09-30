@@ -1,16 +1,24 @@
-package valueobject
+package vo
 
 import (
 	"github.com/google/uuid"
 	"github.com/ribeirosaimon/aergia-utils/logs"
 )
 
-type UUID string
+type UUID struct {
+	value string
+}
 
-func NewUuid() UUID {
+func NewUuid() *UUID {
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
 		logs.ERROR.Message("Error creating new UUID")
 	}
-	return UUID(newUUID.String())
+	return &UUID{
+		value: newUUID.String(),
+	}
+}
+
+func (uuid *UUID) GetUUID() string {
+	return uuid.value
 }

@@ -1,4 +1,4 @@
-package valueobject
+package vo
 
 import (
 	"testing"
@@ -55,7 +55,7 @@ func TestPassoword(t *testing.T) {
 				assert.Equal(t, v.errorMsg, err.Error())
 				return
 			}
-			assert.Equal(t, v.password, password.value)
+			assert.Equal(t, v.password, password.GetValue())
 			assert.Nil(t, err)
 		})
 	}

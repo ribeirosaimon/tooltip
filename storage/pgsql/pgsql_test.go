@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/ribeirosaimon/aergia-utils/domain/entities/sql"
-	"github.com/ribeirosaimon/aergia-utils/domain/valueobject"
+	"github.com/ribeirosaimon/aergia-utils/domain/vo"
 	"github.com/ribeirosaimon/aergia-utils/testutils/aergiatestcontainer"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,11 +43,11 @@ func TestPgsql(t *testing.T) {
 	})
 
 	t.Run("create string query", func(t *testing.T) {
-		email, _ := valueobject.NewEmail("test@test.com")
-		password, _ := valueobject.NewPassword("P@sw0rd!")
+		email, _ := vo.NewEmail("test@test.com")
+		password, _ := vo.NewPassword("P@sw0rd!")
 		u := sql.User{
 			Email:    *email,
-			Username: valueobject.NewName("test"),
+			Username: vo.NewName("test"),
 			Password: *password,
 		}
 		query := pgsql.CreateQuery(u)

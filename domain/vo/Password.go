@@ -1,9 +1,10 @@
-package valueobject
+package vo
 
 import (
 	"regexp"
 
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Password struct {
@@ -31,4 +32,28 @@ func NewPassword(pass string) (*Password, error) {
 	return &Password{
 		value: pass,
 	}, nil
+}
+
+func (p *Password) Encode() error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(p.value), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	p.value = string(hash)
+	return nil
+}
+
+func (p *Password) VerifyPassword(pass string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	if err = bcrypt.CompareHashAndPassword(hash, []byte(p.value)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Password) GetValue() string {
+	return p.value
 }

@@ -1,4 +1,4 @@
-package valueobject
+package vo
 
 import (
 	"testing"
@@ -23,7 +23,7 @@ func TestEmail(t *testing.T) {
 				assert.Equal(t, v.errorMsg, err.Error())
 				return
 			}
-			assert.Equal(t, v.email, email.email)
+			assert.Equal(t, v.email, email.GetValue())
 			assert.Nil(t, err)
 		})
 	}

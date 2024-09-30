@@ -7,9 +7,10 @@ const (
 )
 
 const (
-	DEV  EnvironmentType = "dev"
-	PROD EnvironmentType = "prod"
-	TEST EnvironmentType = "test"
+	DEV         EnvironmentType = "dev"
+	PROD        EnvironmentType = "prod"
+	INTEGRATION EnvironmentType = "integration_test"
+	TEST        EnvironmentType = "test"
 )
 
 const (
@@ -20,6 +21,7 @@ const (
 	ApiPort           string = "api.port"
 
 	// SecretKey this block is about security
-	SecretKey  string = "secretKey"
-	LoggedUser string = "loggedUser"
+	SecretKey      string = "secretKey"
+	LoggedUser     string = "loggedUser"
+	PasswordJwtKey string = "password.jwt.key"
 )
