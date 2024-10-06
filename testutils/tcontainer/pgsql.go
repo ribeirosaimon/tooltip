@@ -1,4 +1,4 @@
-package aergiatestcontainer
+package tcontainer
 
 import (
 	"context"
@@ -9,12 +9,17 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-func Mongo(ctx context.Context) (string, error) {
+func Pgsql(ctx context.Context) (string, error) {
 
 	req := testcontainers.ContainerRequest{
-		Image:        "mongo:latest",
-		ExposedPorts: []string{"27017/tcp"},
-		WaitingFor:   wait.ForListeningPort("27017/tcp"),
+		Image:        "postgres:latest",
+		ExposedPorts: []string{"5432/tcp"},
+		Env: map[string]string{
+			"POSTGRES_USER":     "test",
+			"POSTGRES_PASSWORD": "test",
+			"POSTGRES_DB":       "testdb",
+		},
+		WaitingFor: wait.ForListeningPort("5432/tcp"),
 	}
 
 	mongoC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -30,9 +35,9 @@ func Mongo(ctx context.Context) (string, error) {
 		return "", errors.New(fmt.Sprintf("Could not get container host: %s", err))
 	}
 
-	port, err := mongoC.MappedPort(ctx, "27017")
+	port, err := mongoC.MappedPort(ctx, "5432")
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("Could not get container port: %s", err))
 	}
-	return fmt.Sprintf("mongodb://%s:%s", host, port.Port()), nil
+	return fmt.Sprintf("postgres://test:test@%s:%s/testdb?sslmode=disable", host, port.Port()), nil
 }

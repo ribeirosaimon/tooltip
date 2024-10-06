@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ribeirosaimon/aergia-utils/testutils/aergiatestcontainer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPgsql(t *testing.T) {
 	var err error
 	ctx := context.Background()
-	url, err := aergiatestcontainer.Pgsql(ctx)
+	url, err := tcontainer.Pgsql(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}

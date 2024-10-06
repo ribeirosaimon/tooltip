@@ -11,49 +11,49 @@ import (
 	"sync"
 
 	_ "github.com/lib/pq"
-	"github.com/ribeirosaimon/aergia-utils/tlog"
+	"github.com/ribeirosaimon/tooltip/tlog"
 )
 
 var (
 	oncePgsql       sync.Once
-	aergiaConn      AergiaPgsqlConnection
+	pgConn          PostgresConnection
 	pgsqlDefaultUrl = "jdbc:postgresql://localhost:5432/postgres"
 )
 
 // Option was a function optional pattern
-type Option func(*AergiaPgsqlConnection)
+type Option func(*PostgresConnection)
 
 func WithUrl(url string) Option {
-	return func(a *AergiaPgsqlConnection) {
+	return func(a *PostgresConnection) {
 		a.url = url
 	}
 }
 
-type AergiaPgsqlConnection struct {
+type PostgresConnection struct {
 	url   string
 	pgsql *sql.DB
 }
 
-type AergiaPgsqlInterface interface {
+type PostgresConnInterface interface {
 	GetConnection() *sql.DB
 	CreateQuery(v any) string
 }
 
-func NewConnPgsql(opts ...Option) AergiaPgsqlInterface {
-	aergiaConn = AergiaPgsqlConnection{
+func NewConnPgsql(opts ...Option) PostgresConnInterface {
+	pgConn = PostgresConnection{
 		url: pgsqlDefaultUrl,
 	}
 	for _, opt := range opts {
-		opt(&aergiaConn)
+		opt(&pgConn)
 	}
 
 	oncePgsql.Do(func() {
-		aergiaConn.pgsql = aergiaConn.conn()
+		pgConn.pgsql = pgConn.conn()
 	})
-	return &aergiaConn
+	return &pgConn
 }
 
-func (c *AergiaPgsqlConnection) conn() *sql.DB {
+func (c *PostgresConnection) conn() *sql.DB {
 	ctx := context.TODO()
 	host, port, dbname, user, password, err := extractDBDetails(c.url)
 	if err != nil {
@@ -97,11 +97,11 @@ func extractDBDetails(jdbcURL string) (string, string, string, string, string, e
 	return host, port, dbname, user, password, nil
 }
 
-func (c *AergiaPgsqlConnection) GetConnection() *sql.DB {
+func (c *PostgresConnection) GetConnection() *sql.DB {
 	return c.pgsql
 }
 
-func (c *AergiaPgsqlConnection) CreateQuery(v any) string {
+func (c *PostgresConnection) CreateQuery(v any) string {
 	val := reflect.ValueOf(v)
 	typ := reflect.TypeOf(v)
 

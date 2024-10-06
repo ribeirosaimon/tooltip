@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/ribeirosaimon/aergia-utils/testutils/aergiatestcontainer"
+	"github.com/ribeirosaimon/tooltip/testutils/tcontainer"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,7 +31,7 @@ func newTest() *Test {
 
 func TestMongo(t *testing.T) {
 	ctx := context.Background()
-	url, err := aergiatestcontainer.Mongo(ctx)
+	url, err := tcontainer.Mongo(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
