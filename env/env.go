@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ribeirosaimon/aergia-utils/tlog"
+	"github.com/ribeirosaimon/tooltip/tlog"
 	"gopkg.in/yaml.v3"
 )
 
