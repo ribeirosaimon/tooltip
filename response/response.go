@@ -1,60 +1,35 @@
 package response
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
-type handlerError struct {
-	Message string    `json:"message"`
-	Status  int       `json:"status"`
-	Now     time.Time `json:"now"`
-}
-
-func AergiaResponseOk(c *gin.Context, b any) {
-	if b == nil {
-		c.AbortWithStatus(http.StatusOK)
-	} else {
-		c.JSON(http.StatusOK, b)
-		c.Abort()
+func Ok(w http.ResponseWriter, data interface{}) {
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 	}
-	return
 }
 
-func AergiaResponseForbidden(c *gin.Context, err error) {
-	status := http.StatusForbidden
-	c.Status(status)
-	c.JSON(status, handlerError{
-		Message: err.Error(),
-		Status:  status,
-		Now:     time.Now(),
-	})
-	c.Abort()
-	return
+func BadRequest(w http.ResponseWriter, msg error) {
+	if err := json.NewEncoder(w).Encode(newErrorHandler(msg, http.StatusBadRequest)); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+	}
 }
 
-func AergiaResponseUnauthorized(c *gin.Context, err error) {
-	status := http.StatusUnauthorized
-	c.Status(status)
-	c.JSON(status, handlerError{
-		Message: err.Error(),
-		Status:  status,
-		Now:     time.Now(),
-	})
-	c.Abort()
-	return
+type errorHandler struct {
+	Timestamp time.Time `json:"timestamp"`
+	Message   string    `json:"message"`
+	Code      int       `json:"code"`
 }
 
-func AergiaResponseStatusBadRequest(c *gin.Context, err error) {
-	status := http.StatusBadRequest
-	c.Status(status)
-	c.JSON(status, handlerError{
-		Message: err.Error(),
-		Status:  status,
-		Now:     time.Now(),
-	})
-	c.Abort()
-	return
+func newErrorHandler(err error, statusCode int) errorHandler {
+	return errorHandler{
+		Message:   err.Error(),
+		Code:      statusCode,
+		Timestamp: time.Now(),
+	}
 }

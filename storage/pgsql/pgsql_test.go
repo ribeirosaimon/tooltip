@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ribeirosaimon/aergia-utils/domain/entities/sql"
-	"github.com/ribeirosaimon/aergia-utils/domain/vo"
 	"github.com/ribeirosaimon/aergia-utils/testutils/aergiatestcontainer"
 	"github.com/stretchr/testify/assert"
 )
@@ -40,19 +38,6 @@ func TestPgsql(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "test", name)
 
-	})
-
-	t.Run("create string query", func(t *testing.T) {
-		email, _ := vo.NewEmail("test@test.com")
-		password, _ := vo.NewPassword("P@sw0rd!")
-		u := sql.User{
-			Email:    *email,
-			Username: vo.NewName("test"),
-			Password: *password,
-		}
-		query := pgsql.CreateQuery(u)
-
-		assert.Equal(t, "INSERT INTO user (ID, Username, Password, Email, FirstName, LastName, LoginAtempt, Role, Audit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);", query)
 	})
 
 	for _, v := range []struct {

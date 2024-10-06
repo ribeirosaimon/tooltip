@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	_ "github.com/lib/pq"
-	"github.com/ribeirosaimon/aergia-utils/logs"
+	"github.com/ribeirosaimon/aergia-utils/tlog"
 )
 
 var (
@@ -57,20 +57,21 @@ func (c *AergiaPgsqlConnection) conn() *sql.DB {
 	ctx := context.TODO()
 	host, port, dbname, user, password, err := extractDBDetails(c.url)
 	if err != nil {
-		logs.ERROR.Message(fmt.Sprintf("Error opening database: %q", err))
+
+		tlog.Error(fmt.Sprintf("Error opening database: %q", err))
 	}
 	sprintf := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", sprintf)
 	if err != nil {
-		logs.ERROR.Message(fmt.Sprintf("Error opening database: %q", err))
+		tlog.Error(fmt.Sprintf("Error opening database: %q", err))
 	}
 	err = db.PingContext(ctx)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			logs.ERROR.Message("Connection attempt timed out")
+			tlog.Error("Connection attempt timed out")
 		} else {
-			logs.ERROR.Message(fmt.Sprintf("Error connecting to the database: %v", err))
+			tlog.Error(fmt.Sprintf("Error connecting to the database: %v", err))
 		}
 	}
 
@@ -83,7 +84,7 @@ func extractDBDetails(jdbcURL string) (string, string, string, string, string, e
 	match := re.FindStringSubmatch(jdbcURL)
 
 	if len(match) != 6 {
-		logs.ERROR.Message("Error parsing connection string")
+		tlog.Error("Error parsing connection string")
 		return "", "", "", "", "", errors.New("error parsing connection string")
 	}
 
@@ -105,7 +106,7 @@ func (c *AergiaPgsqlConnection) CreateQuery(v any) string {
 	typ := reflect.TypeOf(v)
 
 	if typ.Kind() != reflect.Struct {
-		logs.ERROR.Message("CreateQuery: expected a struct")
+		tlog.Error("CreateQuery: expected a struct")
 	}
 
 	tableName := typ.Name()
