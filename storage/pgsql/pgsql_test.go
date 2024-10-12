@@ -1,20 +1,19 @@
 package pgsql
 
 import (
-	"context"
 	"testing"
 
+	"github.com/ribeirosaimon/tooltip/testutils/tcontainer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPgsql(t *testing.T) {
 	var err error
-	ctx := context.Background()
-	url, err := tcontainer.Pgsql(ctx)
-	if err != nil {
+	container := tcontainer.NewPgsqlTestContainer()
+	if err = container.Pgsql(); err != nil {
 		t.Fatal(err)
 	}
-	pgsql := NewConnPgsql(WithUrl(url))
+	pgsql := NewConnPgsql(WithUrl(container.GetHost()))
 
 	t.Run("need insert test", func(t *testing.T) {
 		one, insertError := pgsql.GetConnection().Exec(`
