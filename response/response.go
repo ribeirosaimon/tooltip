@@ -7,9 +7,17 @@ import (
 )
 
 func Ok(w http.ResponseWriter, data interface{}) {
+	defaultSuccessresponse(w, data, http.StatusOK)
+}
+
+func Created(w http.ResponseWriter, data interface{}) {
+	defaultSuccessresponse(w, data, http.StatusCreated)
+}
+
+func defaultSuccessresponse(w http.ResponseWriter, data interface{}, status int) {
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(status)
 	}
 }
 

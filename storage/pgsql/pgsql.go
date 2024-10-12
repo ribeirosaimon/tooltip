@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"reflect"
+	"log"
+	"os"
 	"regexp"
-	"strings"
 	"sync"
 
 	_ "github.com/lib/pq"
 	"github.com/ribeirosaimon/tooltip/tlog"
+	"github.com/ribeirosaimon/tooltip/tserver"
 )
 
 var (
@@ -34,12 +35,11 @@ type PostgresConnection struct {
 	pgsql *sql.DB
 }
 
-type PostgresConnInterface interface {
+type PConnInterface interface {
 	GetConnection() *sql.DB
-	CreateQuery(v any) string
 }
 
-func NewConnPgsql(opts ...Option) PostgresConnInterface {
+func NewConnPgsql(opts ...Option) *PostgresConnection {
 	pgConn = PostgresConnection{
 		url: pgsqlDefaultUrl,
 	}
@@ -49,6 +49,7 @@ func NewConnPgsql(opts ...Option) PostgresConnInterface {
 
 	oncePgsql.Do(func() {
 		pgConn.pgsql = pgConn.conn()
+		pgConn.CreateScripts(tserver.GetPgsqlConfig().EntryPoint)
 	})
 	return &pgConn
 }
@@ -57,21 +58,20 @@ func (c *PostgresConnection) conn() *sql.DB {
 	ctx := context.TODO()
 	host, port, dbname, user, password, err := extractDBDetails(c.url)
 	if err != nil {
-
-		tlog.Error(fmt.Sprintf("Error opening database: %q", err))
+		tlog.Error("NewConnPgsql", fmt.Sprintf("Error opening database: %q", err))
 	}
 	sprintf := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", sprintf)
 	if err != nil {
-		tlog.Error(fmt.Sprintf("Error opening database: %q", err))
+		tlog.Error("NewConnPgsql", "Error opening database: %q", err)
 	}
 	err = db.PingContext(ctx)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			tlog.Error("Connection attempt timed out")
+			tlog.Error("NewConnPgsql", "Connection attempt timed out")
 		} else {
-			tlog.Error(fmt.Sprintf("Error connecting to the database: %v", err))
+			tlog.Error("NewConnPgsql", fmt.Sprintf("Error connecting to the database: %v", err))
 		}
 	}
 
@@ -79,12 +79,12 @@ func (c *PostgresConnection) conn() *sql.DB {
 }
 
 func extractDBDetails(jdbcURL string) (string, string, string, string, string, error) {
-	re := regexp.MustCompile(`^postgres://(.+):(.+)@([^:/?#]+):(\d+)/([^/?#]+)\?`)
+	re := regexp.MustCompile(`^postgres://(.+):(.+)@([^:/?#]+):(\d+)/([^/?#]+)`)
 
 	match := re.FindStringSubmatch(jdbcURL)
 
 	if len(match) != 6 {
-		tlog.Error("Error parsing connection string")
+		tlog.Error("extractDBDetails", "Error parsing connection string")
 		return "", "", "", "", "", errors.New("error parsing connection string")
 	}
 
@@ -97,33 +97,23 @@ func extractDBDetails(jdbcURL string) (string, string, string, string, string, e
 	return host, port, dbname, user, password, nil
 }
 
-func (c *PostgresConnection) GetConnection() *sql.DB {
-	return c.pgsql
+func (c *PostgresConnection) CreateScripts(sqlFile string) {
+	fileContent, err := os.ReadFile(sqlFile)
+	if err != nil {
+		log.Fatalf("failed to read file %s: %v", sqlFile, err)
+	}
+
+	db, err := sql.Open("postgres", c.url)
+	if err != nil {
+		log.Fatal("failed to connect to db:", err)
+	}
+	defer db.Close()
+	_, err = db.Exec(string(fileContent))
+	if err != nil {
+		log.Fatalf("failed to execute query %s: %v", sqlFile, err)
+	}
 }
 
-func (c *PostgresConnection) CreateQuery(v any) string {
-	val := reflect.ValueOf(v)
-	typ := reflect.TypeOf(v)
-
-	if typ.Kind() != reflect.Struct {
-		tlog.Error("CreateQuery: expected a struct")
-	}
-
-	tableName := typ.Name()
-	var columns []string
-	var placeholders []string
-
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		columns = append(columns, field.Name)
-		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
-	}
-
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);",
-		strings.ToLower(tableName),
-		strings.Join(columns, ", "),
-		strings.Join(placeholders, ", "),
-	)
-
-	return query
+func (c *PostgresConnection) GetConnection() *sql.DB {
+	return c.pgsql
 }

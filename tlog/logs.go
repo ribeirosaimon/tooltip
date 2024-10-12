@@ -1,6 +1,7 @@
 package tlog
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 )
@@ -14,17 +15,34 @@ func init() {
 	logger = slog.New(handler)
 }
 
-func Debug(message string, keyvals ...interface{}) {
-	logger.Debug(message, keyvals...)
-}
-func Info(message string, keyvals ...interface{}) {
-	logger.Info(message, keyvals...)
+type LogStruct struct {
+	Callfunc string
+	Message  string
 }
 
-func Warn(message string, keyvals ...interface{}) {
-	logger.Warn(message, keyvals...)
+func NewLogStruct(svc, sms string) *LogStruct {
+	return &LogStruct{
+		Callfunc: svc,
+		Message:  sms,
+	}
 }
 
-func Error(message string, keyvals ...interface{}) {
-	logger.Error(message, keyvals...)
+func (l *LogStruct) toString() string {
+	return fmt.Sprintf("{Service: %s, Message: %s}", l.Callfunc, l.Message)
+}
+
+func Debug(svc, msg string, keyvals ...interface{}) {
+	logger.Debug(NewLogStruct(svc, msg).toString(), keyvals...)
+}
+
+func Info(svc, msg string, keyvals ...interface{}) {
+	logger.Info(NewLogStruct(svc, msg).toString(), keyvals...)
+}
+
+func Warn(svc, msg string, keyvals ...interface{}) {
+	logger.Warn(NewLogStruct(svc, msg).toString(), keyvals...)
+}
+
+func Error(svc, msg string, keyvals ...interface{}) {
+	logger.Error(NewLogStruct(svc, msg).toString(), keyvals...)
 }

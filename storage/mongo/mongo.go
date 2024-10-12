@@ -11,58 +11,58 @@ import (
 
 var (
 	onceMongo       sync.Once
-	aergiaConn      AergiaMongoConnection
+	mongoConn       MongoConnection
 	mongoDefaultUrl = "mongodb://localhost:27017"
 )
 
-type AergiaMongoInterface interface {
+type MConnInterface interface {
 	GetConnection() *mongo.Database
 }
 
 // Option was a function optional pattern
-type Option func(*AergiaMongoConnection)
+type Option func(*MongoConnection)
 
 func WithUrl(url string) Option {
-	return func(a *AergiaMongoConnection) {
+	return func(a *MongoConnection) {
 		a.url = url
 	}
 }
 
 func WithDatabase(db string) Option {
-	return func(a *AergiaMongoConnection) {
+	return func(a *MongoConnection) {
 		a.database = db
 	}
 }
 
-func NewConnMongo(ctx context.Context, opts ...Option) AergiaMongoInterface {
-	aergiaConn = AergiaMongoConnection{
+func NewConnMongo(ctx context.Context, opts ...Option) MConnInterface {
+	mongoConn = MongoConnection{
 		url: mongoDefaultUrl,
 	}
-	aergiaConn.conn(ctx)
+	mongoConn.conn(ctx)
 
 	for _, opt := range opts {
-		opt(&aergiaConn)
+		opt(&mongoConn)
 	}
-	if aergiaConn.database == "" {
+	if mongoConn.database == "" {
 		panic("Need to set DATABASE")
 	}
 	onceMongo.Do(func() {
-		aergiaConn.mongo = aergiaConn.conn(ctx)
+		mongoConn.mongo = mongoConn.conn(ctx)
 	})
-	return &aergiaConn
+	return &mongoConn
 }
 
-type AergiaMongoConnection struct {
+type MongoConnection struct {
 	url      string
 	database string
 	mongo    *mongo.Database
 }
 
-func (c *AergiaMongoConnection) GetConnection() *mongo.Database {
+func (c *MongoConnection) GetConnection() *mongo.Database {
 	return c.mongo
 }
 
-func (c *AergiaMongoConnection) conn(ctx context.Context) *mongo.Database {
+func (c *MongoConnection) conn(ctx context.Context) *mongo.Database {
 	clientOptions := options.Client().ApplyURI(c.url)
 
 	client, err := mongo.Connect(ctx, clientOptions)
