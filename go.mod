@@ -1,4 +1,4 @@
-module github.com/ribeirosaimon/tooltip
+module github.com/ribeirosaimon/tooltip/v3
 
 go 1.23.1
 
@@ -8,6 +8,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.33.0
 	go.mongodb.org/mongo-driver v1.17.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -64,5 +65,4 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
