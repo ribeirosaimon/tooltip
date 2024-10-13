@@ -1,4 +1,4 @@
-module github.com/ribeirosaimon/tooltip/v3
+module github.com/ribeirosaimon/tooltip
 
 go 1.23.1
 
