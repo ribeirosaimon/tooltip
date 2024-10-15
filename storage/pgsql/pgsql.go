@@ -17,20 +17,20 @@ import (
 
 var (
 	oncePgsql       sync.Once
-	pgConn          PostgresConnection
+	pgConn          Connection
 	pgsqlDefaultUrl = "jdbc:postgresql://localhost:5432/postgres"
 )
 
 // Option was a function optional pattern
-type Option func(*PostgresConnection)
+type Option func(*Connection)
 
 func WithUrl(url string) Option {
-	return func(a *PostgresConnection) {
+	return func(a *Connection) {
 		a.url = url
 	}
 }
 
-type PostgresConnection struct {
+type Connection struct {
 	url   string
 	pgsql *sql.DB
 }
@@ -39,8 +39,8 @@ type PConnInterface interface {
 	GetConnection() *sql.DB
 }
 
-func NewConnPgsql(opts ...Option) *PostgresConnection {
-	pgConn = PostgresConnection{
+func NewConnPgsql(opts ...Option) *Connection {
+	pgConn = Connection{
 		url: pgsqlDefaultUrl,
 	}
 	for _, opt := range opts {
@@ -54,7 +54,7 @@ func NewConnPgsql(opts ...Option) *PostgresConnection {
 	return &pgConn
 }
 
-func (c *PostgresConnection) conn() *sql.DB {
+func (c *Connection) conn() *sql.DB {
 	ctx := context.TODO()
 	host, port, dbname, user, password, err := extractDBDetails(c.url)
 	if err != nil {
@@ -97,7 +97,7 @@ func extractDBDetails(jdbcURL string) (string, string, string, string, string, e
 	return host, port, dbname, user, password, nil
 }
 
-func (c *PostgresConnection) CreateScripts(sqlFile string) {
+func (c *Connection) CreateScripts(sqlFile string) {
 	fileContent, err := os.ReadFile(sqlFile)
 	if err != nil {
 		log.Fatalf("failed to read file %s: %v", sqlFile, err)
@@ -114,6 +114,6 @@ func (c *PostgresConnection) CreateScripts(sqlFile string) {
 	}
 }
 
-func (c *PostgresConnection) GetConnection() *sql.DB {
+func (c *Connection) GetConnection() *sql.DB {
 	return c.pgsql
 }
