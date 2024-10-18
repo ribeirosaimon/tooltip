@@ -20,6 +20,10 @@ func WithUrl(url string) Option {
 	}
 }
 
+type RConnInterface interface {
+	GetConnection() *redis.Client
+}
+
 type Connection struct {
 	url      string
 	password string
@@ -48,4 +52,8 @@ func (c *Connection) conn() *redis.Client {
 		Password: c.password,
 		DB:       c.database,
 	})
+}
+
+func (c *Connection) GetConnection() *redis.Client {
+	return c.redis
 }

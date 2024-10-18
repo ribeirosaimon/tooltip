@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Environment is a env value
 type Environment string
 
 const (
@@ -25,6 +26,7 @@ type shortifyEnvironment struct {
 	Config config   `yaml:"config"`
 	Mongo  dbConfig `yaml:"mongo"`
 	Pgsql  dbConfig `yaml:"pgsql"`
+	Redis  dbConfig `yaml:"redis"`
 }
 
 type dbConfig struct {
