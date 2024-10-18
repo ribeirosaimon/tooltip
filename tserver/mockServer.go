@@ -4,6 +4,10 @@ type MockEnvironment struct {
 	PgsqlHost       string
 	PgsqlDatabase   string
 	PgsqlEntryPoint string
+
+	RedisHost       string
+	RedisDatabase   string
+	RedisEntryPoint string
 }
 
 func NewMockEnvironment(mock MockEnvironment) {
@@ -12,5 +16,10 @@ func NewMockEnvironment(mock MockEnvironment) {
 		Host:       mock.PgsqlHost,
 		Database:   mock.PgsqlDatabase,
 		EntryPoint: mock.PgsqlEntryPoint,
+	}
+	env.Redis = dbConfig{
+		Host:       mock.RedisHost,
+		Database:   mock.RedisDatabase,
+		EntryPoint: mock.RedisEntryPoint,
 	}
 }

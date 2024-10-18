@@ -20,6 +20,10 @@ func WithUrl(url string) Option {
 	}
 }
 
+type RConnInterface interface {
+	GetConnection() *redis.Client
+}
+
 type Connection struct {
 	url      string
 	password string
@@ -36,7 +40,8 @@ func NewRedisConnection(opts ...Option) *Connection {
 	}
 
 	oncePgsql.Do(func() {
-		redisConn.redis = redisConn.conn()
+		conn := redisConn.conn()
+		redisConn.redis = conn
 	})
 
 	return &redisConn
@@ -48,4 +53,8 @@ func (c *Connection) conn() *redis.Client {
 		Password: c.password,
 		DB:       c.database,
 	})
+}
+
+func (c *Connection) GetConnection() *redis.Client {
+	return c.redis
 }
