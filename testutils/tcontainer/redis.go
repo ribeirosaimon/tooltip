@@ -19,6 +19,7 @@ func NewRedisTestContainer() *RedisTestContainer {
 		ctx: context.Background(),
 	}
 }
+
 func (r *RedisTestContainer) Start() error {
 
 	req := testcontainers.ContainerRequest{
