@@ -40,7 +40,8 @@ func NewRedisConnection(opts ...Option) *Connection {
 	}
 
 	oncePgsql.Do(func() {
-		redisConn.redis = redisConn.conn()
+		conn := redisConn.conn()
+		redisConn.redis = conn
 	})
 
 	return &redisConn

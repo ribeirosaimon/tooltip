@@ -63,3 +63,7 @@ func GetMongoConfig() dbConfig {
 func GetPgsqlConfig() dbConfig {
 	return env.Pgsql
 }
+
+func GetRedisConfig() dbConfig {
+	return env.Redis
+}

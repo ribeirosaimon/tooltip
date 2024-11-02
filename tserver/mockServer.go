@@ -17,4 +17,9 @@ func NewMockEnvironment(mock MockEnvironment) {
 		Database:   mock.PgsqlDatabase,
 		EntryPoint: mock.PgsqlEntryPoint,
 	}
+	env.Redis = dbConfig{
+		Host:       mock.RedisHost,
+		Database:   mock.RedisDatabase,
+		EntryPoint: mock.RedisEntryPoint,
+	}
 }

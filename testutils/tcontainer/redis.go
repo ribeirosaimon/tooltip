@@ -19,7 +19,8 @@ func NewRedisTestContainer() *RedisTestContainer {
 		ctx: context.Background(),
 	}
 }
-func (r *RedisTestContainer) Redis() error {
+
+func (r *RedisTestContainer) Start() error {
 
 	req := testcontainers.ContainerRequest{
 		Image:        "redis:alpine",
