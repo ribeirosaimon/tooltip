@@ -49,7 +49,9 @@ func NewConnPgsql(opts ...Option) *Connection {
 
 	oncePgsql.Do(func() {
 		pgConn.pgsql = pgConn.conn()
-		pgConn.CreateScripts(tserver.GetPgsqlConfig().EntryPoint)
+		if tserver.GetPgsqlConfig().EntryPoint != "" {
+			pgConn.CreateScripts(tserver.GetPgsqlConfig().EntryPoint)
+		}
 	})
 	return &pgConn
 }
